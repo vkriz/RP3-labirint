@@ -5,3 +5,5 @@ Aplikacija bi trebala napraviti slučajno izgenerirani labirint. Neka su moguće
 
 http://richardssoftware.net/Home/Post/73 - 2 algoritma za izradu labirinta (i crtanje labirinta)
 http://richardssoftware.net/Home/Post/74 - Dijkstrin algoritam za traženje najkraćeg puta u labirintu (i crtanje puta)
+
+https://jeremybytes.blogspot.com/2017/07/more-maze-programming-adding-some-bias.html - složeniji algoritmi za veće i teže labirinte
