@@ -48,5 +48,28 @@ namespace labirint
             }
             set => _cells[cell] = value;
         }
+
+        public Distances PathTo(Cell goal)
+        {
+            var current = goal;
+            var breadcrumbs = new Distances(Root)
+            {
+                [current] = _cells[current]
+            };
+
+            while (current != Root)
+            {
+                foreach (var neighbor in current.Links)
+                {
+                    if (_cells[neighbor] < _cells[current])
+                    {
+                        breadcrumbs[neighbor] = _cells[neighbor];
+                        current = neighbor;
+                        break;
+                    }
+                }
+            }
+            return breadcrumbs;
+        }
     }
 }

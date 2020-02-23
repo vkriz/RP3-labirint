@@ -11,14 +11,23 @@ namespace labirint
         public int Size => Rows * Columns;
         private List<List<Cell>> _grid;
 
+        protected virtual string ContentsOf(Cell cell)
+        {
+            return " ";
+        }
         private enum DrawMode
         {
-            Background, Walls
+            Background, Walls, Path
         }
 
         protected virtual Color? BackgroundColorFor(Cell cell)
         {
-            return null;
+            return Color.Aquamarine;
+        }
+
+        protected virtual bool DrawPath(Cell cell, Graphics g, int cellSize)
+        {
+            return false;
         }
 
         public virtual Cell this[int row, int column]
@@ -111,16 +120,8 @@ namespace labirint
                 cell.Left = this[row, column - 1];
                 cell.Right = this[row, column + 1];
             }
-            var rand = new Random();
-            var randAlgorithm = rand.Next(2);
-            if(randAlgorithm == 0)
-            {
-                BinaryTree();
-            }
-            else
-            {
-                SideWinder();
-            }
+
+            BinaryTree();
         }
 
         public void BinaryTree()
@@ -145,37 +146,7 @@ namespace labirint
             }
         }
 
-        public void SideWinder ()
-        {
-            var rand = new Random();
-            foreach(var row in Row)
-            {
-                var run = new List<Cell>();
-                foreach(var cell in row)
-                {
-                    run.Add(cell);
-
-                    var atRightEdge = cell.Right == null;
-                    var atUpEdge = cell.Up == null;
-                    var shouldCloseOut = atRightEdge || (!atUpEdge && rand.Next(2) == 0);
-                    if (shouldCloseOut)
-                    {
-                        var member = run[rand.Next(run.Count)];
-                        if(member.Up != null)
-                        {
-                            member.Link(member.Up);
-                        }
-                        run.Clear();
-                    }
-                    else
-                    {
-                        cell.Link(cell.Right);
-                    }
-                }
-            }
-        }
-
-        public Image ToImg(int cellSize)
+        public Image ToImg(int cellSize,bool part)
         {
             var width = cellSize * Columns;
             var height = cellSize * Rows;
@@ -184,8 +155,9 @@ namespace labirint
             using(var g = Graphics.FromImage(img))
             {
                 g.Clear(Color.White);
-                foreach (var mode in new[] { DrawMode.Background, DrawMode.Walls })
+                foreach (var mode in new[] { DrawMode.Background, DrawMode.Walls, DrawMode.Path })
                 {
+                    int br = 0;
                     foreach (var cell in Cells)
                     {
                         var x1 = cellSize * cell.Column;
@@ -205,24 +177,30 @@ namespace labirint
                         {
                             if (cell.Up == null)
                             {
-                                g.DrawLine(Pens.Black, x1, y1, x2, y1);
+                                g.DrawLine(new Pen(Color.Black, 3), x1, y1, x2, y1);
                             }
 
                             if (!cell.IsLinked(cell.Down))
                             {
-                                g.DrawLine(Pens.Black, x1, y2, x2, y2);
+                                g.DrawLine(new Pen(Color.Black, 3), x1, y2, x2, y2);
                                 Console.WriteLine("{0} {1} {2} {3}", x1, y2, x2, y2);
                             }
 
                             if (cell.Left == null)
                             {
-                                g.DrawLine(Pens.Black, x1, y1, x1, y2);
+                                g.DrawLine(new Pen(Color.Black, 3), x1, y1, x1, y2);
                             }
 
                             if (!cell.IsLinked(cell.Right))
                             {
-                                g.DrawLine(Pens.Black, x2, y1, x2, y2);
+                                g.DrawLine(new Pen(Color.Black, 3), x2, y1, x2, y2);
                             }
+                        }
+                        else if (mode == DrawMode.Path)
+                        {
+                            if(br < 2)
+                                if (DrawPath(cell, g, cellSize) && part) br++;
+                          
                         }
                     }
                 }

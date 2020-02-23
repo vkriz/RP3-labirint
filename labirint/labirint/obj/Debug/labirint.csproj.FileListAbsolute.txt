@@ -1,0 +1,10 @@
+C:\Users\Jelena\Documents\RP3-labirint\labirint\labirint\bin\Debug\labirint.exe.config
+C:\Users\Jelena\Documents\RP3-labirint\labirint\labirint\bin\Debug\labirint.exe
+C:\Users\Jelena\Documents\RP3-labirint\labirint\labirint\bin\Debug\labirint.pdb
+C:\Users\Jelena\Documents\RP3-labirint\labirint\labirint\obj\Debug\labirint.csprojAssemblyReference.cache
+C:\Users\Jelena\Documents\RP3-labirint\labirint\labirint\obj\Debug\labirint.Form1.resources
+C:\Users\Jelena\Documents\RP3-labirint\labirint\labirint\obj\Debug\labirint.Properties.Resources.resources
+C:\Users\Jelena\Documents\RP3-labirint\labirint\labirint\obj\Debug\labirint.csproj.GenerateResource.cache
+C:\Users\Jelena\Documents\RP3-labirint\labirint\labirint\obj\Debug\labirint.csproj.CoreCompileInputs.cache
+C:\Users\Jelena\Documents\RP3-labirint\labirint\labirint\obj\Debug\labirint.exe
+C:\Users\Jelena\Documents\RP3-labirint\labirint\labirint\obj\Debug\labirint.pdb
