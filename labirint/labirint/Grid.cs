@@ -11,9 +11,19 @@ namespace labirint
         public int Size => Rows * Columns;
         private List<List<Cell>> _grid;
 
+        protected virtual string ContentsOf(Cell cell)
+        {
+            return " ";
+        }
+
         private enum DrawMode
         {
-            Background, Walls
+            Background, Walls, Path
+        }
+
+        protected virtual bool DrawPath(Cell cell, Graphics g, int cellSize)
+        {
+            return false;
         }
 
         protected virtual Color? BackgroundColorFor(Cell cell)
@@ -175,16 +185,17 @@ namespace labirint
             }
         }
 
-        public Image ToImg(int cellSize, int finishX, int finishY, Boolean hasPrey)
+        public Image ToImg(int cellSize, int finishX, int finishY, int preyX, int preyY, bool part)
         {
             var width = cellSize * Columns;
             var height = cellSize * Rows;
 
             var img = new Bitmap(width + 1, height + 1);
-            using(var g = Graphics.FromImage(img))
+            
+            using (var g = Graphics.FromImage(img))
             {
                 g.Clear(Color.White);
-                foreach (var mode in new[] { DrawMode.Background, DrawMode.Walls })
+                foreach (var mode in new[] { DrawMode.Background, DrawMode.Walls, DrawMode.Path })
                 {
                     foreach (var cell in Cells)
                     {
@@ -196,7 +207,7 @@ namespace labirint
                         if(mode == DrawMode.Background)
                         {
                             var color = BackgroundColorFor(cell);
-                            if(color != null)
+                            if(color != null && part)
                             {
                                 g.FillRectangle(new SolidBrush(color.GetValueOrDefault()), x1, y1, cellSize, cellSize);
                             }
@@ -204,24 +215,27 @@ namespace labirint
                         {
                             if (cell.Up == null)
                             {
-                                g.DrawLine(Pens.Black, x1, y1, x2, y1);
+                                g.DrawLine(new Pen(Color.Black, 3), x1, y1, x2, y1);
                             }
 
                             if (!cell.IsLinked(cell.Down))
                             {
-                                g.DrawLine(Pens.Black, x1, y2, x2, y2);
-                                Console.WriteLine("{0} {1} {2} {3}", x1, y2, x2, y2);
+                                g.DrawLine(new Pen(Color.Black, 3), x1, y2, x2, y2);
                             }
 
                             if (cell.Left == null)
                             {
-                                g.DrawLine(Pens.Black, x1, y1, x1, y2);
+                                g.DrawLine(new Pen(Color.Black, 3), x1, y1, x1, y2);
                             }
 
                             if (!cell.IsLinked(cell.Right))
                             {
-                                g.DrawLine(Pens.Black, x2, y1, x2, y2);
+                                g.DrawLine(new Pen(Color.Black, 3), x2, y1, x2, y2);
                             }
+                        }
+                        else if (mode == DrawMode.Path)
+                        {
+                            DrawPath(cell, g, cellSize);
                         }
                     }
                 }
@@ -235,14 +249,11 @@ namespace labirint
                 drawString = "F";
                 g.DrawString(drawString, drawFont, drawBrush, (finishX + 0.4f) * cellSize, (finishY + 0.4f) * cellSize, drawFormat);
 
-                if (hasPrey)
+                if (preyX != -1 && preyY != -1)
                 {
-                    Random random = new Random();
-                    int x = random.Next(0, Rows);
-                    int y = random.Next(0, Columns);
                     using (Brush b = new SolidBrush(Color.Red))
                     {
-                        g.FillEllipse(b, (x + 0.25f) * cellSize, (y + 0.25f) * cellSize, 0.5f * cellSize, 0.5f * cellSize);
+                        g.FillEllipse(b, (preyX + 0.25f) * cellSize, (preyY + 0.25f) * cellSize, 0.5f * cellSize, 0.5f * cellSize);
                     }
                 }
             }

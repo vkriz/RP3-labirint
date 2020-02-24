@@ -29,11 +29,11 @@ namespace labirint
                 {
                     var newFrontier = new HashSet<Cell>();
 
-                    foreach(var cell in frontier)
+                    foreach (var cell in frontier)
                     {
-                        foreach(var linked in cell.Links)
+                        foreach (var linked in cell.Links)
                         {
-                            if(distances[linked] >= 0)
+                            if (distances[linked] >= 0)
                             {
                                 continue;
                             }
@@ -84,7 +84,7 @@ namespace labirint
 
         public bool IsLinked(Cell cell)
         {
-            if(cell == null)
+            if (cell == null)
             {
                 return false;
             }

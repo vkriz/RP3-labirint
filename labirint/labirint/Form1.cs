@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,6 +15,21 @@ namespace labirint
     {
         int counter = 0;
         Timer MyTimer;
+        Point lastPoint = Point.Empty;
+        bool isMouseDown = new Boolean();
+        bool isKeyPressed = new Boolean();
+        ColoredPathGrid labirint;
+        int cellSize;
+        int x = 0;
+        int y = 0;
+        int xEnd;
+        int yEnd;
+        int preyX = -1;
+        int preyY = -1;
+        Point startingPoint;
+        Point endingPoint;
+        Image img;
+        bool hintOn = false;
 
         public Form1()
         {
@@ -22,6 +38,8 @@ namespace labirint
 
         private void button1_Click(object sender, EventArgs e)
         {
+            preyX = -1;
+            preyY = -1;
             if (MyTimer != null)
             {
                 MyTimer.Stop();
@@ -30,11 +48,32 @@ namespace labirint
             pictureBox1.BorderStyle = BorderStyle.None;
             int level = Int32.Parse(comboBox1.SelectedItem.ToString());
             int gridSize = level * 5;
-            ColoredGrid labirint = new ColoredGrid(gridSize, gridSize);
-            Image img = labirint.ToImg((pictureBox1.Size.Width - 1)/ gridSize, gridSize - 1, gridSize - 1, radioButton1.Checked);
+            labirint = new ColoredPathGrid(gridSize, gridSize);
+            cellSize = (pictureBox1.Size.Width - 1) / gridSize;
 
-            pictureBox1.Image = img;
+            startingPoint = pictureBox1.Location;
+            startingPoint.Offset(cellSize / 2, cellSize / 2);
+            labirint.Distances = labirint[0, 0].Distances;
+            xEnd = labirint._farthest.Column;
+            yEnd = labirint._farthest.Row;
+            endingPoint = new Point(labirint._farthest.Column * cellSize + cellSize / 2, labirint._farthest.Row * cellSize + cellSize / 2);
 
+            x = 0;
+            y = 0;
+            isKeyPressed = false;
+
+            if(radioButton1.Checked)
+            {
+                Random random = new Random();
+                preyX = random.Next(0, gridSize);
+                preyY = random.Next(0, gridSize);
+                while ((preyX == 0 && preyY == 0) || (preyX == xEnd && preyY == yEnd))
+                {
+                    preyX = random.Next(0, gridSize);
+                    preyY = random.Next(0, gridSize);
+                }
+            } 
+           
             if(radioButton3.Checked)
             {
                 counter = level * 30;
@@ -57,6 +96,243 @@ namespace labirint
                 MyTimer.Tick += new EventHandler(MyTimer_Tick);
                 MyTimer.Start();
             }
+            refreshPicture();
+
+            Button hintButton = new Button();
+            hintButton.Text = "&Hint";
+            hintButton.Location = new Point(23, 420);
+            hintButton.Click += new EventHandler(Hint_Click);
+            Controls.Add(hintButton);
+        }
+
+        private void refreshPicture()
+        {
+            img = labirint.ToImg(cellSize, xEnd, yEnd, preyX, preyY, false);
+            pictureBox1.Image = img;
+            Cursor.Position = PointToScreen(startingPoint);
+            lastPoint = Point.Empty;
+            isMouseDown = false;
+        }
+
+        private void PictureBox1_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (!hintOn)
+            {
+                Point st = new Point(startingPoint.X - pictureBox1.Location.X, startingPoint.Y - pictureBox1.Location.Y);
+                if (!isKeyPressed && Location.X >= st.X - cellSize / 2 && e.Location.X <= st.X + cellSize / 2 && e.Location.Y >= st.Y - cellSize / 2 && e.Location.Y <= st.Y + cellSize / 2)
+                {
+                    lastPoint = e.Location;
+                    isMouseDown = true;
+                }
+                else
+                {
+                    isMouseDown = false;
+                    lastPoint = Point.Empty;
+                    refreshPicture();
+                }
+            }
+        }
+
+        private void PictureBox1_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (isMouseDown == true && !hintOn)
+            {
+                if (lastPoint != null)
+                {
+                    using (Graphics g = Graphics.FromImage(pictureBox1.Image))
+                    {
+                        foreach (Cell cell in labirint.Cells)
+                        {
+                            var x1 = cellSize * cell.Column;
+                            var x2 = cellSize * (cell.Column + 1);
+                            var y1 = cellSize * cell.Row;
+                            var y2 = cellSize * (cell.Row + 1);
+
+                            int x = e.Location.X;
+                            int y = e.Location.Y;
+                            if (cell.Up == null)
+                            {
+                                if (x >= x1 && x <= x2 && y >= y1 && y <= y1)
+                                {
+                                    MessageBox.Show("Zid!!");
+                                    refreshPicture();
+                                    return;
+                                }
+
+                            }
+
+                            if (!cell.IsLinked(cell.Down))
+                            {
+                                if (x >= x1 && x <= x2 && y >= y2 && y <= y2)
+                                {
+                                    MessageBox.Show("Zid!!");
+                                    refreshPicture();
+                                    return;
+                                }
+                            }
+
+                            if (cell.Left == null)
+                            {
+                                if (x >= x1 && x <= x1 && y >= y1 && y <= y2)
+                                {
+                                    MessageBox.Show("Zid!!");
+                                    refreshPicture();
+                                    return;
+                                }
+                            }
+
+                            if (!cell.IsLinked(cell.Right))
+                            {
+                                if (x >= x2 && x <= x2 && y >= y1 && y <= y2)
+                                {
+                                    MessageBox.Show("Zid!!");
+                                    refreshPicture();
+                                    return;
+                                }
+                            }
+
+                        }
+
+                        g.DrawLine(new Pen(Color.Black, 1), lastPoint, e.Location);
+                        g.SmoothingMode = SmoothingMode.AntiAlias;
+
+                    }
+
+                    pictureBox1.Invalidate();
+                    lastPoint = e.Location;
+                    if (checkEnd(e))
+                    {
+                        MessageBox.Show("Pobjeda!!");
+                    }
+                    checkPrey(e);
+                }
+
+            }
+        }
+
+        private void PictureBox1_MouseUp(object sender, MouseEventArgs e)
+        {
+
+        }
+
+        private Boolean checkEnd(MouseEventArgs e)
+        {
+            Point st = new Point(endingPoint.X, endingPoint.Y);
+            if (e.Location.X >= st.X - cellSize / 2 && e.Location.X <= st.X + cellSize / 2 && e.Location.Y >= st.Y - cellSize / 2 && e.Location.Y <= st.Y + cellSize / 2)
+            {
+                isMouseDown = false;
+                lastPoint = Point.Empty;
+                return true;
+            }
+
+            return false;
+        }
+
+        private void checkPrey(MouseEventArgs e)
+        {
+
+            Point st = new Point(preyX * cellSize + cellSize / 2, preyY * cellSize + cellSize / 2);
+            if (e.Location.X >= st.X - cellSize / 2 && e.Location.X <= st.X + cellSize / 2 && e.Location.Y >= st.Y - cellSize / 2 && e.Location.Y <= st.Y + cellSize / 2)
+            {
+                isMouseDown = false;
+                lastPoint = Point.Empty;
+                preyX = -1;
+                preyY = -1;
+            }
+        }
+
+        private void Form1_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (isMouseDown || hintOn) return;
+
+            if (e.KeyCode == Keys.Up)
+            {
+                if (!labirint[y, x].IsLinked(labirint[y, x].Up) || (y - 1) < 0)
+                {
+                    MessageBox.Show("Zid!!");
+                    return;
+                }
+
+                y--;
+
+                ProccessKeyDown();
+            }
+
+            if (e.KeyCode == Keys.Down)
+            {
+                if (!labirint[y, x].IsLinked(labirint[y, x].Down) || (y + 1) > cellSize)
+                {
+                    MessageBox.Show("Zid!!");
+                    return;
+                }
+
+                y++;
+
+                ProccessKeyDown();
+            }
+
+            if (e.KeyCode == Keys.Left)
+            {
+                if (!labirint[y, x].IsLinked(labirint[y, x].Left) || (x - 1) < 0)
+                {
+                    MessageBox.Show("Zid!!");
+                    return;
+                }
+
+                x--;
+
+                ProccessKeyDown();
+            }
+
+            if (e.KeyCode == Keys.Right)
+            {
+                if (!labirint[y, x].IsLinked(labirint[y, x].Right) || (x + 1) > cellSize)
+                {
+                    MessageBox.Show("Zid!!");
+                    return;
+                }
+
+                x++;
+
+                ProccessKeyDown();
+            }
+
+        }
+        private void ProccessKeyDown()
+        {
+            var start = labirint[0, 0];
+            var distances = start.Distances;
+            labirint.Path = distances.PathTo(labirint[y, x]);
+
+            img = labirint.ToImg(cellSize, xEnd, yEnd, preyX, preyY, false);
+            pictureBox1.Image = img;
+            isKeyPressed = true;
+            if (y == yEnd && x == xEnd)
+            {
+                MessageBox.Show("Pobjeda");
+                x = 0;
+                y = 0;
+                isKeyPressed = false;
+            }
+
+            if(x == preyX && y == preyY)
+            {
+                preyX = -1;
+                preyY = -1;
+            }
+
+        }
+
+        private void Hint_Click(object sender, EventArgs e)
+        {
+            hintOn = true;
+            var start = labirint[0, 0];
+            var distances = start.Distances;
+            labirint.Distances = labirint[0, 0].Distances;
+            Image img = labirint.ToImg(cellSize, xEnd, yEnd, preyX, preyY, true);
+            pictureBox1.Image = img;
+
+            timer1.Start();
         }
 
         private void MyTimer_Tick(object sender, EventArgs e)
@@ -133,6 +409,15 @@ namespace labirint
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
 
+        }
+
+        private void Timer1_Tick(object sender, EventArgs e)
+        {
+            pictureBox1.Image = img;
+            if (isMouseDown)
+                Cursor.Position = PointToScreen(new Point(lastPoint.X + pictureBox1.Location.X, lastPoint.Y + pictureBox1.Location.Y));
+            timer1.Stop();
+            hintOn = false;
         }
     }
 }

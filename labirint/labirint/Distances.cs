@@ -24,9 +24,9 @@ namespace labirint
             {
                 var maxDistance = 0;
                 var maxCell = Root;
-                foreach(var cell in _cells)
+                foreach (var cell in _cells)
                 {
-                    if(cell.Value > maxDistance)
+                    if (cell.Value > maxDistance)
                     {
                         maxDistance = cell.Value;
                         maxCell = cell.Key;
@@ -47,6 +47,29 @@ namespace labirint
                 return -1;
             }
             set => _cells[cell] = value;
+        }
+
+        public Distances PathTo(Cell goal)
+        {
+            var current = goal;
+            var breadcrumbs = new Distances(Root)
+            {
+                [current] = _cells[current]
+            };
+
+            while (current != Root)
+            {
+                foreach (var neighbor in current.Links)
+                {
+                    if (_cells[neighbor] < _cells[current])
+                    {
+                        breadcrumbs[neighbor] = _cells[neighbor];
+                        current = neighbor;
+                        break;
+                    }
+                }
+            }
+            return breadcrumbs;
         }
     }
 }
