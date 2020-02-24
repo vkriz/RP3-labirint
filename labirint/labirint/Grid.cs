@@ -175,7 +175,7 @@ namespace labirint
             }
         }
 
-        public Image ToImg(int cellSize)
+        public Image ToImg(int cellSize, int finishX, int finishY, Boolean hasPrey)
         {
             var width = cellSize * Columns;
             var height = cellSize * Rows;
@@ -198,7 +198,6 @@ namespace labirint
                             var color = BackgroundColorFor(cell);
                             if(color != null)
                             {
-                                Console.WriteLine("trebao bi");
                                 g.FillRectangle(new SolidBrush(color.GetValueOrDefault()), x1, y1, cellSize, cellSize);
                             }
                         } else if (mode == DrawMode.Walls)
@@ -224,6 +223,26 @@ namespace labirint
                                 g.DrawLine(Pens.Black, x2, y1, x2, y2);
                             }
                         }
+                    }
+                }
+
+                String drawString = "S";
+                Font drawFont = new Font("Arial", cellSize * 0.3f);
+                SolidBrush drawBrush = new SolidBrush(Color.Black);
+                StringFormat drawFormat = new StringFormat();
+                g.DrawString(drawString, drawFont, drawBrush, 0.3f * cellSize, 0.3f * cellSize, drawFormat);
+
+                drawString = "F";
+                g.DrawString(drawString, drawFont, drawBrush, (finishX + 0.4f) * cellSize, (finishY + 0.4f) * cellSize, drawFormat);
+
+                if (hasPrey)
+                {
+                    Random random = new Random();
+                    int x = random.Next(0, Rows);
+                    int y = random.Next(0, Columns);
+                    using (Brush b = new SolidBrush(Color.Red))
+                    {
+                        g.FillEllipse(b, (x + 0.25f) * cellSize, (y + 0.25f) * cellSize, 0.5f * cellSize, 0.5f * cellSize);
                     }
                 }
             }
