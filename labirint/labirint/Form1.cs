@@ -14,6 +14,7 @@ namespace labirint
     public partial class Form1 : Form
     {
         int counter = 0;
+        int lives = 3;
         Timer MyTimer;
         Point lastPoint = Point.Empty;
         bool isMouseDown = new Boolean();
@@ -30,14 +31,24 @@ namespace labirint
         Point endingPoint;
         Image img;
         bool hintOn = false;
+        PictureBox pc2;
 
         public Form1()
         {
             InitializeComponent();
+            pc2 = new PictureBox();
+            pc2.BackColor = Color.Transparent;
+            pc2.Parent = pictureBox1;
+            pc2.Size = new Size(pictureBox1.Size.Width, pictureBox1.Size.Height);
+            pc2.MouseDown += new MouseEventHandler(PictureBox1_MouseDown);
+            pc2.MouseUp += new MouseEventHandler(PictureBox1_MouseUp);
+            pc2.MouseMove += new MouseEventHandler(PictureBox1_MouseMove);
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
+            label2.ForeColor = Color.Black;
+            label3.Text = "Životi: 3";
             preyX = -1;
             preyY = -1;
             if (MyTimer != null)
@@ -109,6 +120,7 @@ namespace labirint
         {
             img = labirint.ToImg(cellSize, xEnd, yEnd, preyX, preyY, false);
             pictureBox1.Image = img;
+            pc2.Image = labirint.drawPrey(preyX, preyY, cellSize);
             Cursor.Position = PointToScreen(startingPoint);
             lastPoint = Point.Empty;
             isMouseDown = false;
@@ -155,6 +167,18 @@ namespace labirint
                                 if (x >= x1 && x <= x2 && y >= y1 && y <= y1)
                                 {
                                     MessageBox.Show("Zid!!");
+                                    lives--;
+                                    label3.Text = String.Concat("Životi: ", lives);
+                                    if (lives == 0)
+                                    {
+                                        if (MyTimer != null)
+                                        {
+                                            MyTimer.Stop();
+                                            MyTimer.Tick -= MyTimer_Tick;
+                                        }
+                                        MessageBox.Show("Game over!");
+                                        Reset();
+                                    }
                                     refreshPicture();
                                     return;
                                 }
@@ -166,6 +190,18 @@ namespace labirint
                                 if (x >= x1 && x <= x2 && y >= y2 && y <= y2)
                                 {
                                     MessageBox.Show("Zid!!");
+                                    lives--;
+                                    label3.Text = String.Concat("Životi: ", lives);
+                                    if (lives == 0)
+                                    {
+                                        if (MyTimer != null)
+                                        {
+                                            MyTimer.Stop();
+                                            MyTimer.Tick -= MyTimer_Tick;
+                                        }
+                                        MessageBox.Show("Game over!");
+                                        Reset();
+                                    }
                                     refreshPicture();
                                     return;
                                 }
@@ -176,6 +212,18 @@ namespace labirint
                                 if (x >= x1 && x <= x1 && y >= y1 && y <= y2)
                                 {
                                     MessageBox.Show("Zid!!");
+                                    lives--;
+                                    label3.Text = String.Concat("Životi: ", lives);
+                                    if (lives == 0)
+                                    {
+                                        if (MyTimer != null)
+                                        {
+                                            MyTimer.Stop();
+                                            MyTimer.Tick -= MyTimer_Tick;
+                                        }
+                                        MessageBox.Show("Game over!");
+                                        Reset();
+                                    }
                                     refreshPicture();
                                     return;
                                 }
@@ -186,6 +234,18 @@ namespace labirint
                                 if (x >= x2 && x <= x2 && y >= y1 && y <= y2)
                                 {
                                     MessageBox.Show("Zid!!");
+                                    lives--;
+                                    label3.Text = String.Concat("Životi: ", lives);
+                                    if (lives == 0)
+                                    {
+                                        if (MyTimer != null)
+                                        {
+                                            MyTimer.Stop();
+                                            MyTimer.Tick -= MyTimer_Tick;
+                                        }
+                                        MessageBox.Show("Game over!");
+                                        Reset();
+                                    }
                                     refreshPicture();
                                     return;
                                 }
@@ -200,9 +260,15 @@ namespace labirint
 
                     pictureBox1.Invalidate();
                     lastPoint = e.Location;
-                    if (checkEnd(e))
+                    if (checkEnd(e) && preyX == -1 && preyY == -1)
                     {
+                        if(MyTimer != null)
+                        {
+                            MyTimer.Stop();
+                            MyTimer.Tick -= MyTimer_Tick;
+                        }
                         MessageBox.Show("Pobjeda!!");
+                        Reset();
                     }
                     checkPrey(e);
                 }
@@ -234,10 +300,9 @@ namespace labirint
             Point st = new Point(preyX * cellSize + cellSize / 2, preyY * cellSize + cellSize / 2);
             if (e.Location.X >= st.X - cellSize / 2 && e.Location.X <= st.X + cellSize / 2 && e.Location.Y >= st.Y - cellSize / 2 && e.Location.Y <= st.Y + cellSize / 2)
             {
-                isMouseDown = false;
-                lastPoint = Point.Empty;
                 preyX = -1;
                 preyY = -1;
+                pc2.Image = labirint.drawPrey(preyX, preyY, cellSize);
             }
         }
 
@@ -250,6 +315,18 @@ namespace labirint
                 if (!labirint[y, x].IsLinked(labirint[y, x].Up) || (y - 1) < 0)
                 {
                     MessageBox.Show("Zid!!");
+                    lives--;
+                    label3.Text = String.Concat("Životi: ", lives);
+                    if (lives == 0)
+                    {
+                        if (MyTimer != null)
+                        {
+                            MyTimer.Stop();
+                            MyTimer.Tick -= MyTimer_Tick;
+                        }
+                        MessageBox.Show("Game over!");
+                        Reset();
+                    }
                     return;
                 }
 
@@ -263,6 +340,18 @@ namespace labirint
                 if (!labirint[y, x].IsLinked(labirint[y, x].Down) || (y + 1) > cellSize)
                 {
                     MessageBox.Show("Zid!!");
+                    lives--;
+                    label3.Text = String.Concat("Životi: ", lives);
+                    if (lives == 0)
+                    {
+                        if (MyTimer != null)
+                        {
+                            MyTimer.Stop();
+                            MyTimer.Tick -= MyTimer_Tick;
+                        }
+                        MessageBox.Show("Game over!");
+                        Reset();
+                    }
                     return;
                 }
 
@@ -276,6 +365,18 @@ namespace labirint
                 if (!labirint[y, x].IsLinked(labirint[y, x].Left) || (x - 1) < 0)
                 {
                     MessageBox.Show("Zid!!");
+                    lives--;
+                    label3.Text = String.Concat("Životi: ", lives);
+                    if (lives == 0)
+                    {
+                        if (MyTimer != null)
+                        {
+                            MyTimer.Stop();
+                            MyTimer.Tick -= MyTimer_Tick;
+                        }
+                        MessageBox.Show("Game over!");
+                        Reset();
+                    }
                     return;
                 }
 
@@ -289,6 +390,18 @@ namespace labirint
                 if (!labirint[y, x].IsLinked(labirint[y, x].Right) || (x + 1) > cellSize)
                 {
                     MessageBox.Show("Zid!!");
+                    lives--;
+                    label3.Text = String.Concat("Životi: ", lives);
+                    if (lives == 0)
+                    {
+                        if (MyTimer != null)
+                        {
+                            MyTimer.Stop();
+                            MyTimer.Tick -= MyTimer_Tick;
+                        }
+                        MessageBox.Show("Game over!");
+                        Reset();
+                    }
                     return;
                 }
 
@@ -306,13 +419,21 @@ namespace labirint
 
             img = labirint.ToImg(cellSize, xEnd, yEnd, preyX, preyY, false);
             pictureBox1.Image = img;
+            pc2.Image = labirint.drawPrey(preyX, preyY, cellSize);
+
             isKeyPressed = true;
-            if (y == yEnd && x == xEnd)
+            if (y == yEnd && x == xEnd && preyX == -1 && preyY == -1)
             {
-                MessageBox.Show("Pobjeda");
+                if(MyTimer != null)
+                {
+                    MyTimer.Stop();
+                    MyTimer.Tick -= MyTimer_Tick;
+                }
+                MessageBox.Show("Pobjeda!!");
                 x = 0;
                 y = 0;
                 isKeyPressed = false;
+                Reset();
             }
 
             if(x == preyX && y == preyY)
@@ -331,6 +452,7 @@ namespace labirint
             labirint.Distances = labirint[0, 0].Distances;
             Image img = labirint.ToImg(cellSize, xEnd, yEnd, preyX, preyY, true);
             pictureBox1.Image = img;
+            pc2.Image = labirint.drawPrey(preyX, preyY, cellSize);
 
             timer1.Start();
         }
@@ -414,10 +536,44 @@ namespace labirint
         private void Timer1_Tick(object sender, EventArgs e)
         {
             pictureBox1.Image = img;
+            pc2.Image = labirint.drawPrey(preyX, preyY, cellSize);
             if (isMouseDown)
                 Cursor.Position = PointToScreen(new Point(lastPoint.X + pictureBox1.Location.X, lastPoint.Y + pictureBox1.Location.Y));
             timer1.Stop();
             hintOn = false;
+        }
+
+        public void Reset ()
+        {
+            counter = 30;
+            label2.ForeColor = Color.Black;
+            lives = 3;
+            MyTimer = null;
+            lastPoint = Point.Empty;
+            isMouseDown = new Boolean();
+            isKeyPressed = new Boolean();
+            labirint = null;
+            cellSize = 0;
+            x = 0;
+            y = 0;
+            xEnd = 0;
+            yEnd = 0;
+            preyX = -1;
+            preyY = -1;
+            startingPoint = Point.Empty;
+            endingPoint = Point.Empty;
+            img = null;
+            hintOn = false;
+            pictureBox1.Controls.Clear();
+            pc2 = new PictureBox();
+            pc2.BackColor = Color.Transparent;
+            pc2.Parent = pictureBox1;
+            pc2.Size = new Size(pictureBox1.Size.Width, pictureBox1.Size.Height);
+            pc2.MouseDown += new MouseEventHandler(PictureBox1_MouseDown);
+            pc2.MouseUp += new MouseEventHandler(PictureBox1_MouseUp);
+            pc2.MouseMove += new MouseEventHandler(PictureBox1_MouseMove);
+            pictureBox1.Image = null;
+            pictureBox1.BorderStyle = BorderStyle.FixedSingle;
         }
     }
 }

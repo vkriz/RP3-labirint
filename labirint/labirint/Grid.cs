@@ -248,7 +248,14 @@ namespace labirint
 
                 drawString = "F";
                 g.DrawString(drawString, drawFont, drawBrush, (finishX + 0.4f) * cellSize, (finishY + 0.4f) * cellSize, drawFormat);
-
+            }
+            return img;
+        }
+        public Image drawPrey(int preyX, int preyY, int cellSize)
+        {
+            Image preyImg = new Bitmap(cellSize * Columns + 1, cellSize * Rows + 1);
+            using (var g = Graphics.FromImage(preyImg))
+            {
                 if (preyX != -1 && preyY != -1)
                 {
                     using (Brush b = new SolidBrush(Color.Red))
@@ -257,7 +264,7 @@ namespace labirint
                     }
                 }
             }
-            return img;
+            return preyImg;
         }
     }
 }
