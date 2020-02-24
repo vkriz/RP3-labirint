@@ -17,11 +17,12 @@ namespace labirint
         int cellSize;
         int x = 0;
         int y = 0;
+        int xEnd;
+        int yEnd;
         Point startingPoint;
         Point endingPoint;
-        List<Cell> visited = new List<Cell>();
         Image img;
-
+        bool hintOn = false;
 
         public Form1()
         {
@@ -38,12 +39,18 @@ namespace labirint
 
             startingPoint = pictureBox1.Location;
             startingPoint.Offset(cellSize / 2, cellSize / 2);
-            endingPoint = pictureBox1.Location;
-            endingPoint.Offset(cellSize / 2, pictureBox1.Height - cellSize / 2);
+            //endingPoint = pictureBox1.Location;
+            //endingPoint.Offset(cellSize / 2, pictureBox1.Height - cellSize / 2);
+            labirint.Distances = labirint[0, 0].Distances;
+            xEnd = labirint._farthest.Column;
+            yEnd = labirint._farthest.Row;
+            endingPoint = new Point(labirint._farthest.Column*cellSize + cellSize / 2, labirint._farthest.Row*cellSize + cellSize / 2);
+          
             x = 0;
             y = 0;
             isKeyPressed = false;
             refreshPicture();
+        
         }
 
         private void refreshPicture()
@@ -51,7 +58,6 @@ namespace labirint
             img = labirint.ToImg(cellSize, false);
             pictureBox1.Image = img;
             Cursor.Position = PointToScreen(startingPoint);
-            visited.Clear();
             lastPoint = Point.Empty;
             isMouseDown = false;
 
@@ -60,21 +66,26 @@ namespace labirint
 
         private void PictureBox1_MouseDown(object sender, MouseEventArgs e)
         {
-            Point st  = new Point(startingPoint.X - pictureBox1.Location.X, startingPoint.Y - pictureBox1.Location.Y);
-            if (!isKeyPressed && Location.X >= st.X - cellSize/2 && e.Location.X <= st.X + cellSize / 2 && e.Location.Y >= st.Y - cellSize / 2 && e.Location.Y <= st.Y + cellSize / 2)
+            if(!hintOn)
             {
-                lastPoint = e.Location;
-                isMouseDown = true;
-            }
-            else
-            {
-                refreshPicture();
+                Point st = new Point(startingPoint.X - pictureBox1.Location.X, startingPoint.Y - pictureBox1.Location.Y);
+                if (!isKeyPressed && Location.X >= st.X - cellSize / 2 && e.Location.X <= st.X + cellSize / 2 && e.Location.Y >= st.Y - cellSize / 2 && e.Location.Y <= st.Y + cellSize / 2)
+                {
+                    lastPoint = e.Location;
+                    isMouseDown = true;
+                }
+                else
+                {
+                    isMouseDown = false;
+                    lastPoint = Point.Empty;
+                    refreshPicture();
+                }
             }
         }
 
         private void PictureBox1_MouseMove(object sender, MouseEventArgs e)
         {
-            if (isMouseDown == true)
+            if (isMouseDown == true && !hintOn)
             {
                 if (lastPoint != null)
                 {
@@ -91,7 +102,6 @@ namespace labirint
                             int y = e.Location.Y;
                             if (cell.Up == null)
                             {
-                                //g.DrawLine(Pens.Black, x1, y1, x2, y1);
                                 if(x >= x1 && x <= x2 && y >= y1 && y <= y1)
                                 {
                                     MessageBox.Show("Zid!!");
@@ -152,19 +162,12 @@ namespace labirint
 
         private void PictureBox1_MouseUp(object sender, MouseEventArgs e)
         {
-            isMouseDown = false;
-            lastPoint = Point.Empty;
 
-            if (checkEnd(e))
-            {
-                MessageBox.Show("Pobjeda!!");
-            }
-            refreshPicture();
         }
 
         private Boolean checkEnd(MouseEventArgs e)
         {
-            Point st = new Point(endingPoint.X - pictureBox1.Location.X, endingPoint.Y - pictureBox1.Location.Y);
+            Point st = new Point(endingPoint.X, endingPoint.Y);
             if (e.Location.X >= st.X - cellSize / 2 && e.Location.X <= st.X + cellSize / 2 && e.Location.Y >= st.Y - cellSize / 2 && e.Location.Y <= st.Y + cellSize / 2)
             {
                 isMouseDown = false;
@@ -177,7 +180,7 @@ namespace labirint
 
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
-            if (isMouseDown) return;
+            if (isMouseDown || hintOn) return;
 
             if (e.KeyCode == Keys.Up)
             {
@@ -186,8 +189,6 @@ namespace labirint
                     MessageBox.Show("Zid!!");
                     return;
                 }
-                if (visited.Contains(labirint[y-1, x]))
-                    return;
 
                 y--;
 
@@ -201,8 +202,6 @@ namespace labirint
                     MessageBox.Show("Zid!!");
                     return;
                 }
-                if (visited.Contains(labirint[y + 1, x]))
-                    return;
 
                 y++;
 
@@ -216,8 +215,6 @@ namespace labirint
                     MessageBox.Show("Zid!!");
                     return;
                 }
-                if (visited.Contains(labirint[y, x-1]))
-                    return;
 
                 x--;
 
@@ -231,8 +228,6 @@ namespace labirint
                     MessageBox.Show("Zid!!");
                     return;
                 }
-                if (visited.Contains(labirint[y, x+1]))
-                    return;
 
                 x++;
 
@@ -246,11 +241,10 @@ namespace labirint
             var distances = start.Distances;
             labirint.Path = distances.PathTo(labirint[y, x]);
 
-            Image img = labirint.ToImg(cellSize, false);
+            img = labirint.ToImg(cellSize, false);
             pictureBox1.Image = img;
             isKeyPressed = true;
-            visited.Add(labirint[y, x]);
-            if (y == (labirint.Rows - 1) && x == 0)
+            if (y == yEnd && x == xEnd)
             {
                 MessageBox.Show("Pobjeda");
                 x = 0;
@@ -262,29 +256,25 @@ namespace labirint
 
         private void Button2_Click(object sender, EventArgs e)
         {
-            Console.WriteLine("tuuu");
-            if(isKeyPressed)
-            {
-                var start = labirint[y, x];
-                var distances = start.Distances;
-                labirint.Path = distances.PathTo(labirint[labirint.Rows - 1, 0]);
+            hintOn = true;
+            var start = labirint[0, 0];
+            var distances = start.Distances;
+            labirint.Distances = labirint[0, 0].Distances;
+            Image img = labirint.ToImg(cellSize, true);
+            pictureBox1.Image = img;
 
-                Image img = labirint.ToImg(cellSize, true);
-                pictureBox1.Image = img;
-
-                timer1.Start();
-            }
+            timer1.Start();
+            
         }
 
         private void Timer1_Tick(object sender, EventArgs e)
         {
-            var start = labirint[0,0];
-            var distances = start.Distances;
-            labirint.Path = distances.PathTo(labirint[y, x]);
 
-            Image img = labirint.ToImg(cellSize, false);
             pictureBox1.Image = img;
+            if(isMouseDown)
+                Cursor.Position = PointToScreen(new Point(lastPoint.X+pictureBox1.Location.X, lastPoint.Y + pictureBox1.Location.Y));
             timer1.Stop();
+            hintOn = false;
         }
     }
 }

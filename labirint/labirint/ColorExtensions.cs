@@ -18,6 +18,9 @@ namespace labirint
                     (int)(color.B + (255 - color.B) * intensity)
                     );
         }
-
+        public static Color Invert(this Color color)
+        {
+            return Color.FromArgb(color.ToArgb() ^ 0xffffff);
+        }
     }
 }

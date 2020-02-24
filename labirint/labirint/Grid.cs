@@ -22,7 +22,7 @@ namespace labirint
 
         protected virtual Color? BackgroundColorFor(Cell cell)
         {
-            return Color.Aquamarine;
+            return null;
         }
 
         protected virtual bool DrawPath(Cell cell, Graphics g, int cellSize)
@@ -157,7 +157,6 @@ namespace labirint
                 g.Clear(Color.White);
                 foreach (var mode in new[] { DrawMode.Background, DrawMode.Walls, DrawMode.Path })
                 {
-                    int br = 0;
                     foreach (var cell in Cells)
                     {
                         var x1 = cellSize * cell.Column;
@@ -168,9 +167,8 @@ namespace labirint
                         if(mode == DrawMode.Background)
                         {
                             var color = BackgroundColorFor(cell);
-                            if(color != null)
+                            if (color != null && part)
                             {
-                                Console.WriteLine("trebao bi");
                                 g.FillRectangle(new SolidBrush(color.GetValueOrDefault()), x1, y1, cellSize, cellSize);
                             }
                         } else if (mode == DrawMode.Walls)
@@ -183,7 +181,6 @@ namespace labirint
                             if (!cell.IsLinked(cell.Down))
                             {
                                 g.DrawLine(new Pen(Color.Black, 3), x1, y2, x2, y2);
-                                Console.WriteLine("{0} {1} {2} {3}", x1, y2, x2, y2);
                             }
 
                             if (cell.Left == null)
@@ -198,9 +195,7 @@ namespace labirint
                         }
                         else if (mode == DrawMode.Path)
                         {
-                            if(br < 2)
-                                if (DrawPath(cell, g, cellSize) && part) br++;
-                          
+                            DrawPath(cell, g, cellSize);
                         }
                     }
                 }
