@@ -242,6 +242,10 @@ namespace labirint
 
                 String drawString = "S";
                 Font drawFont = new Font("Arial", cellSize * 0.3f);
+                if (!(drawFont.Bold))
+                {
+                    drawFont = new Font(drawFont, FontStyle.Bold);
+                }
                 SolidBrush drawBrush = new SolidBrush(Color.Black);
                 StringFormat drawFormat = new StringFormat();
                 g.DrawString(drawString, drawFont, drawBrush, 0.3f * cellSize, 0.3f * cellSize, drawFormat);
