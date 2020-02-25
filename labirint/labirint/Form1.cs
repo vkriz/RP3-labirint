@@ -73,7 +73,7 @@ namespace labirint
             y = 0;
             isKeyPressed = false;
 
-            if(radioButton1.Checked)
+            if (radioButton1.Checked)
             {
                 Random random = new Random();
                 preyX = random.Next(0, gridSize);
@@ -83,11 +83,11 @@ namespace labirint
                     preyX = random.Next(0, gridSize);
                     preyY = random.Next(0, gridSize);
                 }
-            } 
-           
-            if(radioButton3.Checked)
+            }
+
+            if (radioButton3.Checked)
             {
-                counter = level * 30;
+                counter = level * 15;
                 if (counter >= 60)
                 {
                     int mins = (int)(counter / 60);
@@ -106,6 +106,10 @@ namespace labirint
                 MyTimer.Interval = (1000);
                 MyTimer.Tick += new EventHandler(MyTimer_Tick);
                 MyTimer.Start();
+            }
+            else
+            {
+                label2.Text = "--:--"; 
             }
             refreshPicture();
 
@@ -179,7 +183,10 @@ namespace labirint
                                         MessageBox.Show("Game over!");
                                         Reset();
                                     }
-                                    refreshPicture();
+                                    else 
+                                    {
+                                        refreshPicture();
+                                    }
                                     return;
                                 }
 
@@ -202,7 +209,10 @@ namespace labirint
                                         MessageBox.Show("Game over!");
                                         Reset();
                                     }
-                                    refreshPicture();
+                                    else
+                                    {
+                                        refreshPicture();
+                                    }
                                     return;
                                 }
                             }
@@ -224,7 +234,10 @@ namespace labirint
                                         MessageBox.Show("Game over!");
                                         Reset();
                                     }
-                                    refreshPicture();
+                                    else
+                                    {
+                                        refreshPicture();
+                                    }
                                     return;
                                 }
                             }
@@ -246,7 +259,10 @@ namespace labirint
                                         MessageBox.Show("Game over!");
                                         Reset();
                                     }
-                                    refreshPicture();
+                                    else
+                                    {
+                                        refreshPicture();
+                                    }
                                     return;
                                 }
                             }
@@ -469,6 +485,7 @@ namespace labirint
                 string caption = "Igra je gotova";
                 MessageBoxButtons buttons = MessageBoxButtons.OK;
                 MessageBox.Show(message, caption, buttons);
+                Reset();
             }
             if(counter > 0) counter--;
             if(counter < 10)
