@@ -260,7 +260,7 @@ namespace labirint
 
                     pictureBox1.Invalidate();
                     lastPoint = e.Location;
-                    if (checkEnd(e) && preyX == -1 && preyY == -1)
+                    if (checkEnd(e))
                     {
                         if(MyTimer != null)
                         {
@@ -284,7 +284,7 @@ namespace labirint
         private Boolean checkEnd(MouseEventArgs e)
         {
             Point st = new Point(endingPoint.X, endingPoint.Y);
-            if (e.Location.X >= st.X - cellSize / 2 && e.Location.X <= st.X + cellSize / 2 && e.Location.Y >= st.Y - cellSize / 2 && e.Location.Y <= st.Y + cellSize / 2)
+            if (preyX == -1 && preyY == -1 && e.Location.X >= st.X - cellSize / 2 && e.Location.X <= st.X + cellSize / 2 && e.Location.Y >= st.Y - cellSize / 2 && e.Location.Y <= st.Y + cellSize / 2)
             {
                 isMouseDown = false;
                 lastPoint = Point.Empty;
